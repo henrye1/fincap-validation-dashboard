@@ -1,0 +1,11 @@
+{
+  "name": "financials-auditor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Read-only audit of published financial statements: runs anchorpoint-ts's own validators over a database and writes a report per statement. Standalone — not part of the app, nothing installed here; it borrows ../anchorpoint-suite/anchorpoint-ts/node_modules so TypeORM is one instance.",
+  "scripts": {
+    "start": "node run.js audit",
+    "audit": "node run.js audit",
+    "test": "node run.js test"
+  }
+}

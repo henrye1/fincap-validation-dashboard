@@ -1,0 +1,19 @@
+{
+  "extends": "../anchorpoint-suite/anchorpoint-ts/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "rootDir": "..",
+    "outDir": "./dist",
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "typeRoots": ["../anchorpoint-suite/anchorpoint-ts/node_modules/@types"],
+    "types": ["node", "mocha"],
+    "paths": {
+      "@modules/*": ["../anchorpoint-suite/anchorpoint-ts/src/modules/*"],
+      "@shared/*": ["../anchorpoint-suite/anchorpoint-ts/src/shared/*"],
+      "*": ["../anchorpoint-suite/anchorpoint-ts/node_modules/*", "../anchorpoint-suite/anchorpoint-ts/node_modules/@types/*"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}
