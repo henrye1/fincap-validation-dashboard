@@ -3,7 +3,7 @@ import { CheckResult, StatementAudit } from './types';
 
 export const SUMMARY_COLUMNS = [
     'organisation_id', 'client_id', 'client_name', 'obligor_key', 'statement_id', 'description', 'period',
-    'version', 'company_type', 'publish_date', 'status', 'failed_checks', 'gate_faults', 'unmapped_lines',
+    'version', 'company_type', 'publish_date', 'creator', 'date_created', 'status', 'failed_checks', 'gate_faults', 'unmapped_lines',
     'sign_faults', 'missing_totals', 'translatable', 'ai_source_score', 'error', 'report',
 ] as const;
 
@@ -35,7 +35,8 @@ export function renderMarkdown(a: StatementAudit): string {
     out.push(`| Company type | ${cell(h.company_type)} (${h.company_type_id}) |`);
     out.push(`| Period | ${h.period} |`);
     out.push(`| Previous period | ${h.previous_period || 'n/a'} |`);
-    out.push(`| Published | ${h.publish_date} |`);
+    out.push(`| Created by | ${cell(h.creator) || 'unknown'}${h.created_by_xero ? ' (via Xero)' : ''} on ${h.date_created || 'unknown date'} |`);
+    out.push(`| Published on | ${h.publish_date} (publisher not recorded by the app) |`);
     out.push(`| Lines | ${h.line_count} |`);
     out.push('');
 
@@ -103,6 +104,8 @@ export function summaryRow(a: StatementAudit): SummaryRow {
         version: h.version,
         company_type: h.company_type,
         publish_date: h.publish_date,
+        creator: h.created_by_xero ? `${h.creator} (via Xero)` : h.creator,
+        date_created: h.date_created,
         status: a.status,
         failed_checks: a.checks.filter(c => c.status === 'fail' || c.status === 'error').map(c => c.label).join('; '),
         gate_faults: m.gate_faults,

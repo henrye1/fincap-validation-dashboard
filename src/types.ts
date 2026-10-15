@@ -27,6 +27,10 @@ export interface StatementHeader {
     company_type_id: number;
     company_type: string;
     publish_date: string;
+    /** The creator's email (creator_id). The app records no publisher. */
+    creator: string;
+    date_created: string;
+    created_by_xero: boolean;
     line_count: number;
 }
 

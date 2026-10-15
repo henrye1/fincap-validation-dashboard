@@ -38,7 +38,7 @@
     const q = state.query.trim().toLowerCase();
     const rows = state.rows.filter(r =>
       (state.filter === 'all' || r.status === state.filter) &&
-      (!q || [r.client_name, r.obligor_key, r.description, r.statement_id, r.period].some(v => String(v ?? '').toLowerCase().includes(q))));
+      (!q || [r.client_name, r.obligor_key, r.description, r.statement_id, r.period, r.creator].some(v => String(v ?? '').toLowerCase().includes(q))));
     const pass = state.rows.filter(r => r.status === 'pass').length;
     app.innerHTML = `
       <div class="toolbar">
@@ -63,6 +63,7 @@
       <h3><span>${esc(r.client_name || r.client_id)}</span>${badge(r.status)}</h3>
       <div class="sub">${esc(r.period)} · v${esc(r.version)} · ${esc(r.company_type)} · obligor ${esc(r.obligor_key || '—')}</div>
       <div class="sub">${esc(r.description)}</div>
+      <div class="sub">Created by ${esc(r.creator || 'unknown')}${r.date_created ? ` · ${esc(r.date_created)}` : ''} · published ${esc(r.publish_date)}</div>
       ${r.failed_checks ? `<div class="fails">${esc(r.failed_checks)}</div>` : ''}
       ${r.error ? `<div class="fails">Audit error: ${esc(r.error)}</div>` : ''}
       <div class="metrics">${metrics}${translatable}</div>
@@ -86,7 +87,8 @@
           <div><span>Period</span>${esc(h.period)}${h.previous_period ? ` (prev ${esc(h.previous_period)})` : ''}</div>
           <div><span>Version</span>v${esc(h.version)}</div>
           <div><span>Company type</span>${esc(h.company_type)}</div>
-          <div><span>Published</span>${esc(h.publish_date)}</div>
+          <div><span>Created by</span>${esc(h.creator || 'unknown')}${h.created_by_xero ? ' <span class="muted">(via Xero)</span>' : ''}${h.date_created ? ` <span class="muted">on ${esc(h.date_created)}</span>` : ''}</div>
+          <div><span>Published on</span>${esc(h.publish_date)} <span class="muted" title="financial_statement has no published_by column and no history table">publisher not recorded</span></div>
           <div><span>Obligor key</span>${esc(h.obligor_key || '—')}</div>
           <div><span>Lines</span>${esc(h.line_count)}</div>
           <div><span>Statement id</span><code>${esc(h.id)}</code></div>

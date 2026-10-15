@@ -16,6 +16,9 @@ const header: StatementHeader = {
     company_type_id: 5,
     company_type: 'Corporate',
     publish_date: '2025-02-01',
+    creator: 'analyst@example.com',
+    date_created: '2025-01-20',
+    created_by_xero: false,
     line_count: 31,
 };
 
@@ -59,6 +62,13 @@ describe('fincap-audit report', () => {
             expect(md).to.include('| Client | Acme \\| Holdings |');
             expect(md).to.include('| Statement id | ABCDEF12-3456-7890-ABCD-EF1234567890 |');
             expect(md).to.include('| Company type | Corporate (5) |');
+            expect(md).to.include('| Created by | analyst@example.com on 2025-01-20 |');
+            expect(md).to.include('| Published on | 2025-02-01 (publisher not recorded by the app) |');
+        });
+
+        it('says when the creator was the Xero import', () => {
+            const md = renderMarkdown({ ...passing(), header: { ...header, created_by_xero: true } });
+            expect(md).to.include('| Created by | analyst@example.com (via Xero) on 2025-01-20 |');
         });
 
         it('lists every check with its badge and does not invent a recommendations section', () => {
@@ -113,6 +123,8 @@ describe('fincap-audit report', () => {
             expect(row.missing_totals).to.equal(1);
             expect(row.translatable).to.equal('no');
             expect(row.error).to.equal('');
+            expect(row.creator).to.equal('analyst@example.com');
+            expect(row.date_created).to.equal('2025-01-20');
             expect(row.report).to.equal('org-1/ACME_01/2024-12-31_v2_abcdef12.md');
         });
 

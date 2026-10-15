@@ -183,6 +183,9 @@ function buildHeader(fin: FinancialStatement, client: ClientRow | undefined): St
         company_type_id: companyTypeId,
         company_type: (FinancialStatementCompanyTypeDescriptions as any)[companyTypeId] ?? String(companyTypeId),
         publish_date: isoDate(fin.publish_date),
+        creator: fin.creator_id ?? '',
+        date_created: isoDate(fin.date_created),
+        created_by_xero: !!fin.is_created_by_xero,
         line_count: (fin.lines ?? []).filter(l => !l.deleted_date).length,
     };
 }
@@ -192,7 +195,7 @@ function headerFromTarget(t: Target, client: ClientRow | undefined): StatementHe
         id: t.id, organisation_id: t.organisation_id, client_id: t.client_id,
         client_name: client?.company_name ?? '', obligor_key: client?.obligor_key ?? '',
         description: '', period: t.period ?? '', previous_period: '', version: t.version,
-        company_type_id: 0, company_type: '', publish_date: '', line_count: 0,
+        company_type_id: 0, company_type: '', publish_date: '', creator: '', date_created: '', created_by_xero: false, line_count: 0,
     };
 }
 
