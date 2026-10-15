@@ -54,10 +54,18 @@ tr.node-unused td { background: #fff; color: var(--muted); }
 tr.node-unused .hint, tr.node-used .hint { color: var(--muted); }
 tr.node-used .hint.parent { color: var(--ink); }
 .toggles { display: flex; gap: 14px; }
-td.issues { max-width: 360px; font-size: 12px; }
-td.issues .issue { color: var(--fail); white-space: normal; }
-td.issues .issue.advice { color: var(--advice); }
+td.issues { white-space: nowrap; font-size: 12px; }
 td.issues .ok { color: var(--pass); font-weight: 700; }
+td.issues .chip.fail { background: var(--fail-bg); color: var(--fail); font-weight: 600; }
+td.issues .chip.advice { background: var(--advice-bg); color: var(--advice); font-weight: 600; }
+td.issues .chip.muted { background: transparent; color: var(--muted); padding-left: 0; }
+button.why { border: 0; background: transparent; color: var(--muted); cursor: pointer; font: inherit; padding: 0 4px; }
+tr.has-reason { cursor: pointer; }
+tr.reason { display: none; }
+tr.reason.open { display: table-row; }
+tr.reason td { background: #fffbeb; color: var(--ink); font-size: 13px; border-top: 0; padding: 4px 12px 8px; }
+tr.reason ul { margin: 0; padding-left: 18px; }
+tr.reason li { margin: 2px 0; white-space: normal; }
 .legend { font-size: 12px; color: var(--muted); display: flex; gap: 10px; align-items: center; }
 .legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; border: 1px solid var(--line); vertical-align: middle; margin-right: 2px; }
 .legend .sw.fail { background: var(--fail-bg); } .legend .sw.advice { background: var(--advice-bg); } .legend .sw.pass { background: #ecfdf5; } .legend .sw.node { background: #fafafa; }

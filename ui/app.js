@@ -6,7 +6,7 @@
 (() => {
   const app = document.getElementById('app');
   const runSelect = document.getElementById('run-select');
-  const state = { runs: [], run: null, rows: [], filter: 'all', query: '', showPath: false, showUnused: false };
+  const state = { runs: [], run: null, rows: [], filter: 'all', query: '', showPath: false, showUnused: false, expandReasons: false };
 
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const num = v => v == null ? '' : Number(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -116,6 +116,18 @@
     if (t) t.onchange = () => { state.showPath = t.checked; renderDetail(report); };
     const u = document.getElementById('toggle-unused');
     if (u) u.onchange = () => { state.showUnused = u.checked; renderDetail(report); };
+    const x = document.getElementById('toggle-reasons');
+    if (x) x.onchange = () => { state.expandReasons = x.checked; renderDetail(report); };
+    // Click a chip's chevron (or anywhere on a row that has one) to open its reason row.
+    app.querySelectorAll('tbody tr').forEach(tr => {
+      const btn = tr.querySelector('button.why');
+      if (!btn) return;
+      tr.classList.add('has-reason');
+      tr.onclick = () => {
+        const reason = document.getElementById(btn.dataset.reason);
+        if (reason) reason.classList.toggle('open');
+      };
+    });
   }
 
   /* The findings about one row. A captured line matches by its id (structural checks hand us the
@@ -134,8 +146,33 @@
     });
   }
 
+  /* A two-or-three-word label for a finding; the full message goes in the reason row. */
+  function labelFor(h) {
+    const m = h.message || '';
+    if (/captured lines total/i.test(m) || /assets total .* equity/i.test(m) || h.check === 'Balance Sheet Equality') return 'Does not balance';
+    if (/no captured total/i.test(m)) return 'Missing total';
+    if (/is unmapped/i.test(m) || h.check === 'Chart of Accounts Mapping') return 'Unmapped';
+    if (/must be (positive|negative)/i.test(m) || h.check === 'Mapping Cardinality') return 'Wrong sign';
+    if (h.check === 'No Blank Values') return 'Placeholder';
+    if (h.severity === 'advice') return 'Advisory';
+    return h.check;
+  }
+  const chip = (text, kind) => `<span class="chip ${kind}">${esc(text)}</span>`;
+
   function renderStatements(view, findings) {
     const periods = view.periods;
+    const colSpan = periods.length + 3;
+    let reasonSeq = 0;
+    /* The cell shows chips; the reasons (one per finding) go in a hidden row right after. */
+    const withReasons = (hits, fallback) => {
+      if (!hits.length) return { cell: fallback || '', reasons: '' };
+      const labels = [...new Set(hits.map(labelFor))];
+      const kinds = hits.some(h => h.severity === 'fail') ? 'fail' : 'advice';
+      const id = `r${++reasonSeq}`;
+      const cell = `${labels.map(l => chip(l, kinds)).join(' ')}<button class="why" data-reason="${id}" title="show reason">▾</button>`;
+      const reasons = `<tr class="reason ${state.expandReasons ? 'open' : ''}" id="${id}"><td colspan="${colSpan}"><ul>${hits.map(h => `<li><b>${esc(h.check)}</b>: ${esc(h.message)}</li>`).join('')}</ul></td></tr>`;
+      return { cell, reasons };
+    };
     const header = `<thead><tr><th>Hint text (mapping)</th><th>Line text</th>${periods.map(p => `<th class="num">${esc(p)}</th>`).join('')}<th>Validation</th></tr></thead>`;
     const indent = d => `style="padding-left:${10 + d * 18}px"`;
     const hintCell = r => {
@@ -149,42 +186,42 @@
       if (r.kind === 'node' && !r.used && !state.showUnused) return '';
       const hits = findingsFor(r, statementType, findings);
       const worst = hits.some(h => h.severity === 'fail') ? 'fail' : hits.length ? 'advice' : null;
-      let cls, validation;
+      let cls, v;
       if (r.kind === 'note') {
-        cls = 'note'; validation = '';
+        cls = 'note'; v = { cell: '', reasons: '' };
       } else if (r.kind === 'heading') {
         cls = worst ? `row-${worst}` : 'heading';
-        validation = hits.length ? hits.map(h => `<div class="issue ${h.severity}">${esc(h.check)}: ${esc(h.message)}</div>`).join('') : '<span class="muted">heading</span>';
+        v = withReasons(hits, chip('heading', 'muted'));
       } else if (r.kind === 'nomap') {
         cls = worst ? `row-${worst}` : 'nomap';
-        validation = hits.length ? hits.map(h => `<div class="issue ${h.severity}">${esc(h.check)}: ${esc(h.message)}</div>`).join('') : '<span class="muted">No map — excluded from totals and ratios</span>';
+        v = withReasons(hits, chip('No map', 'muted'));
       } else if (r.kind === 'node') {
         cls = worst ? `row-${worst}` : (r.used ? 'node-used' : 'node-unused');
-        validation = hits.length ? hits.map(h => `<div class="issue ${h.severity}">${esc(h.message)}</div>`).join('')
-          : (r.used ? '<span class="muted">no line captured against this mapping</span>' : '<span class="muted">not used</span>');
+        v = withReasons(hits, r.used ? chip('not captured', 'muted') : '');
       } else if (r.kind === 'unmapped') {
         cls = 'leaf';
-        validation = hits.length ? hits.map(h => `<div class="issue fail">${esc(h.message)}</div>`).join('')
-          : `<div class="issue fail">${r.mapping_id ? 'Mapped to an entry outside this statement\'s chart of accounts' : 'Line is not mapped to the chart of accounts'}</div>`;
+        v = withReasons(hits.length ? hits : [{ check: 'Chart of Accounts Mapping', severity: 'fail',
+          message: r.mapping_id ? 'Mapped to an entry outside this statement\'s chart of accounts' : 'Line is not mapped to the chart of accounts' }]);
       } else if (r.has_children) {
         // Totals and subtotals carry the colour: green when every check on them passes, red otherwise.
         cls = worst ? `row-${worst}` : 'row-pass';
-        validation = hits.length ? hits.map(h => `<div class="issue ${h.severity}">${esc(h.check)}: ${esc(h.message)}</div>`).join('') : '<span class="ok">✓ balances</span>';
+        v = withReasons(hits, '<span class="ok">✓</span>');
       } else {
         cls = 'leaf';
-        validation = hits.length ? hits.map(h => `<div class="issue ${h.severity}">${esc(h.check)}: ${esc(h.message)}</div>`).join('') : '';
+        v = withReasons(hits, '');
       }
       return `<tr class="${cls}">
         <td ${indent(r.depth)}>${hintCell(r)}</td>
         <td>${esc(r.line)}</td>
         ${periods.map(p => `<td class="num">${num(r.values[p])}</td>`).join('')}
-        <td class="issues">${validation}</td>
-      </tr>`;
+        <td class="issues">${v.cell}</td>
+      </tr>${v.reasons}`;
     };
     return `<section>
       <div class="stmt-head"><h2>Statements</h2>
         <span class="legend">totals and subtotals: <i class="sw fail"></i> do not balance / missing <i class="sw advice"></i> advisory <i class="sw pass"></i> balance <i class="sw node"></i> structure</span>
         <span class="toggles">
+          <label class="toggle"><input type="checkbox" id="toggle-reasons" ${state.expandReasons ? 'checked' : ''}> expand all reasons</label>
           <label class="toggle"><input type="checkbox" id="toggle-unused" ${state.showUnused ? 'checked' : ''}> show unused mappings</label>
           <label class="toggle"><input type="checkbox" id="toggle-path" ${state.showPath ? 'checked' : ''}> show full mapping path</label>
         </span></div>
