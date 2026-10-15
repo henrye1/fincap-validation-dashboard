@@ -44,6 +44,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-sp
 tr.row-pass td { background: #ecfdf5; }
 tr.row-advice td { background: var(--advice-bg); }
 tr.row-fail td { background: var(--fail-bg); }
+tr.leaf td { background: #fff; }
 tr.heading td { background: #fff; font-weight: 700; }
 tr.nomap td { background: #fff; color: var(--muted); }
 tr.node-used td { background: #fafafa; }

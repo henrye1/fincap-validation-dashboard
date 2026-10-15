@@ -163,12 +163,16 @@
         validation = hits.length ? hits.map(h => `<div class="issue ${h.severity}">${esc(h.message)}</div>`).join('')
           : (r.used ? '<span class="muted">no line captured against this mapping</span>' : '<span class="muted">not used</span>');
       } else if (r.kind === 'unmapped') {
-        cls = 'row-fail';
+        cls = 'leaf';
         validation = hits.length ? hits.map(h => `<div class="issue fail">${esc(h.message)}</div>`).join('')
           : `<div class="issue fail">${r.mapping_id ? 'Mapped to an entry outside this statement\'s chart of accounts' : 'Line is not mapped to the chart of accounts'}</div>`;
-      } else {
+      } else if (r.has_children) {
+        // Totals and subtotals carry the colour: green when every check on them passes, red otherwise.
         cls = worst ? `row-${worst}` : 'row-pass';
-        validation = hits.length ? hits.map(h => `<div class="issue ${h.severity}">${esc(h.check)}: ${esc(h.message)}</div>`).join('') : '<span class="ok">✓</span>';
+        validation = hits.length ? hits.map(h => `<div class="issue ${h.severity}">${esc(h.check)}: ${esc(h.message)}</div>`).join('') : '<span class="ok">✓ balances</span>';
+      } else {
+        cls = 'leaf';
+        validation = hits.length ? hits.map(h => `<div class="issue ${h.severity}">${esc(h.check)}: ${esc(h.message)}</div>`).join('') : '';
       }
       return `<tr class="${cls}">
         <td ${indent(r.depth)}>${hintCell(r)}</td>
@@ -179,7 +183,7 @@
     };
     return `<section>
       <div class="stmt-head"><h2>Statements</h2>
-        <span class="legend"><i class="sw fail"></i> fails a check <i class="sw advice"></i> advisory <i class="sw pass"></i> passes <i class="sw node"></i> structure</span>
+        <span class="legend">totals and subtotals: <i class="sw fail"></i> do not balance / missing <i class="sw advice"></i> advisory <i class="sw pass"></i> balance <i class="sw node"></i> structure</span>
         <span class="toggles">
           <label class="toggle"><input type="checkbox" id="toggle-unused" ${state.showUnused ? 'checked' : ''}> show unused mappings</label>
           <label class="toggle"><input type="checkbox" id="toggle-path" ${state.showPath ? 'checked' : ''}> show full mapping path</label>
