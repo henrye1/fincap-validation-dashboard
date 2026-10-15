@@ -46,7 +46,9 @@ tr.row-advice td { background: var(--advice-bg); }
 tr.row-fail td { background: var(--fail-bg); }
 tr.leaf td { background: #fff; }
 tr.heading td { background: #fff; font-weight: 700; }
-tr.nomap td { background: #fff; color: var(--muted); }
+tr.nomap td { background: #eff6ff; color: #1e3a8a; }
+td.issues .chip.nomap { background: #dbeafe; color: #1d4ed8; font-weight: 600; }
+.legend .sw.nomap { background: #eff6ff; }
 tr.node-used td { background: #fafafa; }
 tr.node-unused td { background: #fff; color: var(--muted); }
 .hint { color: var(--ink); }

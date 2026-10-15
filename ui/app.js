@@ -194,7 +194,7 @@
         v = withReasons(hits, chip('heading', 'muted'));
       } else if (r.kind === 'nomap') {
         cls = worst ? `row-${worst}` : 'nomap';
-        v = withReasons(hits, chip('No map', 'muted'));
+        v = withReasons(hits, chip('No map', 'nomap'));
       } else if (r.kind === 'node') {
         cls = worst ? `row-${worst}` : (r.used ? 'node-used' : 'node-unused');
         v = withReasons(hits, r.used ? chip('not captured', 'muted') : '');
@@ -219,7 +219,7 @@
     };
     return `<section>
       <div class="stmt-head"><h2>Statements</h2>
-        <span class="legend">totals and subtotals: <i class="sw fail"></i> do not balance / missing <i class="sw advice"></i> advisory <i class="sw pass"></i> balance <i class="sw node"></i> structure</span>
+        <span class="legend">totals and subtotals: <i class="sw fail"></i> do not balance / missing <i class="sw advice"></i> advisory <i class="sw pass"></i> balance <i class="sw node"></i> structure <i class="sw nomap"></i> No map (excluded)</span>
         <span class="toggles">
           <label class="toggle"><input type="checkbox" id="toggle-reasons" ${state.expandReasons ? 'checked' : ''}> expand all reasons</label>
           <label class="toggle"><input type="checkbox" id="toggle-unused" ${state.showUnused ? 'checked' : ''}> show unused mappings</label>
