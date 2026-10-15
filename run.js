@@ -102,6 +102,7 @@ function serve(argv) {
         if (url === '/' || url === '/index.html') return sendFile(res, UI, 'index.html');
         if (url === '/app.js' || url === '/style.css') return sendFile(res, UI, url.slice(1));
         if (url === '/api/runs') { res.writeHead(200, { 'content-type': 'application/json' }); res.end(JSON.stringify(listRuns())); return; }
+        if (url === '/favicon.ico') { res.writeHead(204); res.end(); return; }
         if (url.startsWith('/data/')) return sendFile(res, OUT, url.slice('/data/'.length));
         res.writeHead(404); res.end('not found');
     }).listen(port, '127.0.0.1', () => console.log(`financials-auditor UI: http://localhost:${port}/`));

@@ -8,8 +8,8 @@ describe('collectLineFindings', () => {
             { rule: 'missing_total', mapping_id: 'M2', line_description: 'Current Liabilities', mapping_description: 'Current Liabilities', statement_type: 'Balance Sheet', period: '2024', expected: 5, actual: null, difference: null, message: 'no total' },
         ] as any, []);
         expect(findings).to.deep.equal([
-            { line_id: null, mapping_id: 'M1', description: 'Total assets', statement_type: 'Balance Sheet', check: 'Publish gate (totals balance)', severity: 'fail', message: 'out by 1' },
-            { line_id: null, mapping_id: 'M2', description: 'Current Liabilities', statement_type: 'Balance Sheet', check: 'Publish gate (totals balance)', severity: 'fail', message: 'no total' },
+            { line_id: null, mapping_id: 'M1', description: 'Total assets', statement_type: 'Balance Sheet', check: 'Publish gate (totals balance)', severity: 'fail', message: 'out by 1', period: '2024', expected: 2, actual: 1 },
+            { line_id: null, mapping_id: 'M2', description: 'Current Liabilities', statement_type: 'Balance Sheet', check: 'Publish gate (totals balance)', severity: 'fail', message: 'no total', period: '2024', expected: 5, actual: null },
         ]);
     });
 

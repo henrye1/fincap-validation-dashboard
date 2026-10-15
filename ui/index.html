@@ -4,14 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Financials Auditor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;500;600;700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-<header class="top">
-  <a class="brand" href="#/">Financials Auditor</a>
-  <label class="run-pick">Run <select id="run-select"></select></label>
+<header class="nav">
+  <a class="brand" href="#/"><span class="ms-icon brand-icon">fact_check</span><span>Financials Auditor</span></a>
+  <div class="nav-sep"></div>
+  <label class="run-pick"><span class="run-label">Run</span><select id="run-select"></select><span class="ms-icon">expand_more</span></label>
+  <div class="nav-stats" id="nav-stats"></div>
 </header>
-<main id="app"><p class="muted">Loading…</p></main>
+<main id="app"><p class="muted pad">Loading…</p></main>
 <script src="/app.js"></script>
 </body>
 </html>

@@ -15,6 +15,7 @@ const header: StatementHeader = {
     version: 2,
     company_type_id: 5,
     company_type: 'Corporate',
+    account_type: 'Audited',
     publish_date: '2025-02-01',
     creator: 'analyst@example.com',
     date_created: '2025-01-20',
@@ -62,6 +63,7 @@ describe('fincap-audit report', () => {
             expect(md).to.include('| Client | Acme \\| Holdings |');
             expect(md).to.include('| Statement id | ABCDEF12-3456-7890-ABCD-EF1234567890 |');
             expect(md).to.include('| Company type | Corporate (5) |');
+            expect(md).to.include('| Accounts | Audited |');
             expect(md).to.include('| Created by | analyst@example.com on 2025-01-20 |');
             expect(md).to.include('| Published on | 2025-02-01 (publisher not recorded by the app) |');
         });
@@ -125,6 +127,7 @@ describe('fincap-audit report', () => {
             expect(row.error).to.equal('');
             expect(row.creator).to.equal('analyst@example.com');
             expect(row.date_created).to.equal('2025-01-20');
+            expect(row.account_type).to.equal('Audited');
             expect(row.report).to.equal('org-1/ACME_01/2024-12-31_v2_abcdef12.md');
         });
 

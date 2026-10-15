@@ -21,6 +21,9 @@ export function collectLineFindings(faults: BalanceFault[], results: ValidationR
             check: 'Publish gate (totals balance)',
             severity: 'fail',
             message: f.message,
+            period: f.period,
+            expected: f.expected,
+            actual: f.actual,
         });
     }
 

@@ -26,6 +26,8 @@ export interface StatementHeader {
     version: number;
     company_type_id: number;
     company_type: string;
+    /** Audited / Management / Interim… from the account type reference data. */
+    account_type: string;
     publish_date: string;
     /** The creator's email (creator_id). The app records no publisher. */
     creator: string;
@@ -54,6 +56,10 @@ export interface LineFinding {
     check: string;
     severity: 'fail' | 'advice';
     message: string;
+    /** Publish-gate faults only: the period and what the captured child lines sum to. */
+    period?: string;
+    expected?: number | null;
+    actual?: number | null;
 }
 
 export interface StatementAudit {

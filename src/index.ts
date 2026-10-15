@@ -168,7 +168,7 @@ async function loadClients(connection: Connection, clientIds: string[]): Promise
     return out;
 }
 
-function buildHeader(fin: FinancialStatement, client: ClientRow | undefined): StatementHeader {
+function buildHeader(fin: FinancialStatement, client: ClientRow | undefined, accountTypes: Map<string, string>): StatementHeader {
     const companyTypeId = fin.company_type_id;
     return {
         id: (fin.id ?? '').toLowerCase(),
@@ -182,6 +182,7 @@ function buildHeader(fin: FinancialStatement, client: ClientRow | undefined): St
         version: fin.version,
         company_type_id: companyTypeId,
         company_type: (FinancialStatementCompanyTypeDescriptions as any)[companyTypeId] ?? String(companyTypeId),
+        account_type: accountTypes.get((fin.financial_statement_account_type_id ?? '').toLowerCase()) ?? '',
         publish_date: isoDate(fin.publish_date),
         creator: fin.creator_id ?? '',
         date_created: isoDate(fin.date_created),
@@ -195,7 +196,7 @@ function headerFromTarget(t: Target, client: ClientRow | undefined): StatementHe
         id: t.id, organisation_id: t.organisation_id, client_id: t.client_id,
         client_name: client?.company_name ?? '', obligor_key: client?.obligor_key ?? '',
         description: '', period: t.period ?? '', previous_period: '', version: t.version,
-        company_type_id: 0, company_type: '', publish_date: '', creator: '', date_created: '', created_by_xero: false, line_count: 0,
+        company_type_id: 0, company_type: '', account_type: '', publish_date: '', creator: '', date_created: '', created_by_xero: false, line_count: 0,
     };
 }
 
@@ -220,6 +221,7 @@ async function main(): Promise<void> {
         const targets = await selectTargets(connection, args);
         console.log(`${targets.length} published statement(s) selected`);
         const clients = await loadClients(connection, targets.map(t => t.client_id));
+        const accountTypes = new Map((await deps.refData.listFinancialStatementAccountTypes()).map(t => [(t.id ?? '').toLowerCase(), t.description]));
 
         const outDir = path.resolve(args.out);
         fs.mkdirSync(outDir, { recursive: true });
@@ -251,7 +253,7 @@ async function main(): Promise<void> {
             try {
                 const fin = await repo.findOne(t.id);
                 if (!fin) throw new Error('statement not found when loading');
-                audit = await runChecks(fin, buildHeader(fin, client), deps, { ai: args.ai });
+                audit = await runChecks(fin, buildHeader(fin, client, accountTypes), deps, { ai: args.ai });
                 // The statement as captured, for the UI. A view failure must not fail the audit.
                 try {
                     const [mappings, statementTypes] = await Promise.all([
