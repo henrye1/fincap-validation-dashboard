@@ -48,7 +48,11 @@ Flags: `--db <name>` (default `AUDIT_DB`), `--org <id>`, `--client <id>`, `--ids
 statement (status, failed checks, fault counts), filter by status or search, and click into a statement for the
 full audit plus the Balance Sheet, Income Statement and Cash Flow stacked with every line, its mapping (optionally
 the full mapping path), its sign rule and its value per period. Unmapped lines are highlighted; note lines sit under
-their parent line. Runs made before the UI existed have no per-statement JSON; re-run the audit to get it.
+their parent line. The statements have two layouts, switched with the View toggle and remembered in the browser:
+**APR** lays the lines out on the chart of accounts (hint structure, indented, unused mappings optional); **Original**
+shows them in the order they were captured, with a missing total placed after its last child line. Runs made
+before the UI existed have no per-statement JSON, and runs made before the Original view have no captured order;
+re-run the audit to get them.
 
 ## Output
 

@@ -91,6 +91,14 @@ describe('buildStatementView', () => {
         expect(note.values).to.deep.equal({ '2024-12-31': 100.5 });
     });
 
+    it('keeps the captured order on every line so the statement can be shown as captured', () => {
+        const rows = bs().rows;
+        const seq = (id: string) => rows.find(r => r.line_id === id)!.sequence;
+        expect([seq('l-head'), seq('l-cash'), seq('l-total'), seq('l-sundry'), seq('l-nomap'), seq('l-foreign')]).to.deep.equal([1, 2, 3, 4, 5, 6]);
+        expect(rows.find(r => r.kind === 'note')!.sequence).to.equal(2);
+        expect(rows.filter(r => r.kind === 'node').every(r => r.sequence === null)).to.equal(true);
+    });
+
     it('collects the periods newest first, ignoring deleted facts and deleted lines', () => {
         const v = view();
         expect(v.periods).to.deep.equal(['2024-12-31', '2023-12-31']);

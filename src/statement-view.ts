@@ -13,7 +13,9 @@
  *   heading   a captured line with no mapping and no values — a section title the operator typed
  *   nomap     a captured line parked on the catalogue's "No map" placeholder: deliberately excluded
  *   unmapped  a valued line with no mapping, or a mapping that is not in this statement's catalogue
- * The last three are listed after the structure.
+ * The last three are listed after the structure. `sequence` is the captured order (the line's
+ * sequence; a note takes its parent line's; a node has none) so the UI can also show the statement
+ * as it was captured.
  */
 import { FinancialStatement } from '@modules/financial-capture/entities/FinancialStatement';
 import { FinancialStatementLine } from '@modules/financial-capture/entities/FinancialStatementLine';
@@ -42,6 +44,8 @@ export interface ViewRow {
     line: string;
     values: Record<string, number | null>;
     sign: 'positive' | 'negative' | null;
+    /** The captured order: the line's sequence, its parent's for a note, null for a catalogue node. */
+    sequence: number | null;
 }
 
 export interface ViewStatement {
@@ -153,6 +157,7 @@ export function buildStatementView(
                             has_children: false, used: true,
                             line_id: nl.id ?? null, line: label,
                             values: valuesOf(nl.facts, periods), sign: signOf(nm),
+                            sequence: line.sequence ?? null,
                         };
                     });
             });
@@ -166,6 +171,7 @@ export function buildStatementView(
                     kind: 'node', depth: node.depth, mapping_id: node.mapping_id,
                     hint: node.description, hint_path: hintPath(node), has_children: node.has_children,
                     used: used.has(node.path), line_id: null, line: '', values: {}, sign: signOf(mapping),
+                    sequence: null,
                 });
                 continue;
             }
@@ -175,6 +181,7 @@ export function buildStatementView(
                     hint: node.description, hint_path: hintPath(node), has_children: node.has_children,
                     used: true, line_id: line.id ?? null, line: line.description ?? '',
                     values: valuesOf(line.facts, periods), sign: signOf(mapping),
+                    sequence: line.sequence ?? null,
                 });
                 rows.push(...noteRows(line, node.depth + 1));
             }
@@ -190,6 +197,7 @@ export function buildStatementView(
                 hint: mapping?.description ?? '', hint_path: mapping?.description ?? '', has_children: false,
                 used: true, line_id: line.id ?? null, line: line.description ?? '',
                 values, sign: signOf(mapping),
+                sequence: line.sequence ?? null,
             });
             rows.push(...noteRows(line, 1));
         }

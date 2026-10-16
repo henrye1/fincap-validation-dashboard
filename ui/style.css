@@ -129,6 +129,10 @@ th.num, td.num { text-align: right; }
 
 /* Statements */
 .stmts-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
+.view-pick { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--cl-off-text-color); }
+.stmts-head + .options { margin-bottom: 12px; }
+.options label.off { color: var(--cl-off-text-color); cursor: default; }
+.stmt-table .ph { font-style: italic; color: var(--cl-subtext-color); }
 .tabs { display: flex; border-bottom: 1px solid var(--cl-border-color); gap: 4px; overflow-x: auto; }
 .tab { display: flex; align-items: center; gap: 8px; padding: 10px 16px; cursor: pointer; font-size: 15px; font-weight: 700; color: var(--cl-off-text-color); border-bottom: 3px solid transparent; margin-bottom: -1px; white-space: nowrap; background: none; border-top: 0; border-left: 0; border-right: 0; font-family: inherit; }
 .tab.on { color: var(--cl-primary-color); border-bottom-color: var(--cl-action-color); }

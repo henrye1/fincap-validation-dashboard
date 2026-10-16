@@ -11,6 +11,7 @@
     runs: [], run: null, meta: null, rows: [],
     filter: 'all', query: '',
     tab: 0, problemsOnly: false, showPath: false, showUnused: false, checkFilter: null, hl: null,
+    sview: (() => { try { return localStorage.getItem('fa.sview') === 'orig' ? 'orig' : 'apr'; } catch { return 'apr'; } })(), // statement layout: apr (chart of accounts) | orig (as captured)
   };
 
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -234,6 +235,24 @@
     return null;
   }
 
+  /* Display order for one statement. APR: the chart-of-accounts order the rows already come in.
+   * Original: the captured order (line sequence); a used node with no own line (missing total,
+   * not captured) sits after the last line beneath it; unused nodes are never shown. */
+  function orderRows(rows, orig) {
+    const all = rows.map((x, idx) => ({ x, idx }));
+    if (!orig) return all;
+    const LAST = 1e12;
+    const seqOf = x => {
+      if (x.r.sequence != null) return x.r.sequence;
+      const path = x.r.hint_path, prefix = `${path} > `;
+      const under = rows.filter(y => y.r.sequence != null && (y.r.hint_path === path || y.r.hint_path.startsWith(prefix))).map(y => y.r.sequence);
+      return under.length ? Math.max(...under) + 0.5 : LAST;
+    };
+    return all.filter(({ x }) => x.r.kind !== 'node' || x.r.used)
+      .map(o => ({ ...o, seq: seqOf(o.x) }))
+      .sort((a, b) => (a.seq - b.seq) || (a.idx - b.idx));
+  }
+
   function renderStatements() {
     const { view } = current;
     const d = decorate();
@@ -242,6 +261,8 @@
     const periods = view.periods;
     const rows = d[tab];
     const unused = rows.filter(x => x.r.kind === 'node' && !x.r.used).length;
+    const hasSeq = rows.some(x => x.r.sequence != null);
+    const orig = state.sview === 'orig' && hasSeq;
 
     const V = {
       fail: ['error', 'fail'], missing: ['error', 'fail'], unmapped: ['link_off', 'fail'], ok: ['check', 'ok'],
@@ -263,7 +284,7 @@
       return f ? `lines ${num(f.expected)}` : '';
     };
 
-    const body = rows.map((x, idx) => {
+    const body = orderRows(rows, orig).map(({ x, idx }) => {
       const r = x.r;
       if (r.kind === 'node' && !r.used && !state.showUnused) return '';
       if (state.problemsOnly && !PROBLEM.has(x.kind)) return '';
@@ -272,9 +293,10 @@
       const crumb = state.showPath && r.hint_path && r.hint_path.includes(' > ') ? r.hint_path.split(' > ').slice(0, -1).join(' › ') : '';
       const v = V[x.kind];
       const title = x.hits.map(h => `${h.check}: ${h.message}`).join('\n');
+      const mapCell = `<td style="padding-left:${orig ? 12 : 12 + r.depth * 20}px">${crumb ? `<div class="crumb">${esc(crumb)}</div>` : ''}<span class="lab ${total ? 'total' : ''} ${r.kind === 'nomap' || r.kind === 'unmapped' ? 'dim' : ''}">${esc(label)}</span>${r.sign ? `<span class="sign">${r.sign === 'positive' ? '≥ 0' : '≤ 0'}</span>` : ''}</td>`;
+      const textCell = `<td style="font-weight:${r.kind === 'heading' || (orig && total) ? 700 : 500}">${r.kind === 'node' ? '<span class="ph">No line captured</span>' : esc(r.line)}</td>`;
       return `<tr id="row-${tab}-${idx}" class="k-${x.kind} ${state.hl === `${tab}:${idx}` ? 'hl' : ''}">
-        <td style="padding-left:${12 + r.depth * 20}px">${crumb ? `<div class="crumb">${esc(crumb)}</div>` : ''}<span class="lab ${total ? 'total' : ''} ${r.kind === 'nomap' || r.kind === 'unmapped' ? 'dim' : ''}">${esc(label)}</span>${r.sign ? `<span class="sign">${r.sign === 'positive' ? '≥ 0' : '≤ 0'}</span>` : ''}</td>
-        <td style="font-weight:${r.kind === 'heading' ? 700 : 500}">${esc(r.line)}</td>
+        ${orig ? textCell + mapCell : mapCell + textCell}
         ${periods.map(p => `<td class="num tnum"><div style="font-weight:${total ? 700 : 500}">${x.kind === 'missing' ? '—' : num(r.values[p])}</div>${subFor(x, p) ? `<div class="sub">${esc(subFor(x, p))}</div>` : ''}</td>`).join('')}
         <td>${v[0] ? `<div class="v ${v[1]}" title="${esc(title)}">${icon(v[0])}<span>${esc(vText(x))}</span></div>` : ''}</td>
       </tr>`;
@@ -283,12 +305,16 @@
     return `
       <div class="stmts-head">
         <h2>Statements</h2>
-        <div class="options">
-          <label><input type="checkbox" id="opt-problems" ${state.problemsOnly ? 'checked' : ''}>Problems only</label>
-          <label><input type="checkbox" id="opt-path" ${state.showPath ? 'checked' : ''}>Show mapping path</label>
-          <label><input type="checkbox" id="opt-unused" ${state.showUnused ? 'checked' : ''}>Unused mappings (${unused})</label>
-        </div>
+        <div class="view-pick"><span>View</span><div class="seg sm" id="sview">
+          ${[['orig', 'Original'], ['apr', 'APR']].map(([k, l]) => `<button data-v="${k}" class="${state.sview === k ? 'on' : ''}">${l}</button>`).join('')}
+        </div></div>
       </div>
+      <div class="options">
+        <label><input type="checkbox" id="opt-problems" ${state.problemsOnly ? 'checked' : ''}>Problems only</label>
+        <label><input type="checkbox" id="opt-path" ${state.showPath ? 'checked' : ''}>Show mapping path</label>
+        <label class="${orig ? 'off' : ''}" ${orig ? 'title="Unused mappings are not part of the captured statement"' : ''}><input type="checkbox" id="opt-unused" ${state.showUnused && !orig ? 'checked' : ''} ${orig ? 'disabled' : ''}>Unused mappings (${unused})</label>
+      </div>
+      ${state.sview === 'orig' && !hasSeq ? `<div class="banner">${icon('info')}<span>This run has no captured order. Re-run the audit to use the Original view; showing the APR order.</span></div>` : ''}
       <div class="tabs">${view.statements.map((st, t) => {
         const prob = d[t].filter(x => PROBLEM.has(x.kind)).length;
         const lines = d[t].filter(x => x.r.kind !== 'node' && x.r.kind !== 'note').length;
@@ -296,12 +322,12 @@
       }).join('')}</div>
       <div class="card stmt-card scroll">
         <table class="stmt-table">
-          <thead><tr><th>Mapping</th><th>Line text</th>${periods.map(p => `<th class="num">${esc(p)}</th>`).join('')}<th class="val">Validation</th></tr></thead>
+          <thead><tr>${orig ? '<th>Line text</th><th>Mapping</th>' : '<th>Mapping</th><th>Line text</th>'}${periods.map(p => `<th class="num">${esc(p)}</th>`).join('')}<th class="val">Validation</th></tr></thead>
           <tbody>${body}</tbody>
         </table>
         ${!body.trim() ? '<div class="empty">No problems in this statement</div>' : ''}
       </div>
-      <div class="legend"><span>Red figures under a value are the sum of its captured child lines.</span><span>Totals and subtotals are coloured by their own check; detail lines are plain.</span></div>`;
+      <div class="legend"><span>Red figures under a value are the sum of its captured child lines.</span><span>${orig ? 'Lines in the order they were captured; a missing total sits after its last child line.' : 'Totals and subtotals are coloured by their own check; detail lines are plain.'}</span></div>`;
   }
 
   function wireDetail(report) {
@@ -312,6 +338,7 @@
     app.querySelectorAll('.tab').forEach(el => { el.onclick = () => { state.tab = Number(el.dataset.tab); state.hl = null; rerender(); }; });
     const opt = (id, key) => { const el = document.getElementById(id); if (el) el.onchange = () => { state[key] = el.checked; rerender(); }; };
     opt('opt-problems', 'problemsOnly'); opt('opt-path', 'showPath'); opt('opt-unused', 'showUnused');
+    app.querySelectorAll('#sview button').forEach(el => { el.onclick = () => { state.sview = el.dataset.v; try { localStorage.setItem('fa.sview', state.sview); } catch { /* private mode */ } rerender(); }; });
   }
 
   window.addEventListener('hashchange', () => route().catch(err => { app.innerHTML = `<p class="muted pad">${esc(err.message)}</p>`; }));
