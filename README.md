@@ -71,6 +71,25 @@ reproduces the publish gate's findings on every statement (three differ only in 
 lines on the same total is named). No Blank Values depends on the app's database row order, which the view does not
 carry; it disagreed on 6 of 223 statements.
 
+## Deploy the results (Render)
+
+The page needs no database — only `audit` does — so the results can be hosted for reviewers. `serve.js` is a
+zero-dependency server; `render.yaml` deploys it as a free Render web service, read-only and password protected,
+serving the committed `published/` snapshot and opening on the failing statements.
+
+1. Publish a run into the repo and push: `node run.js publish aprs_za_abl_db/full`, commit `published/`, push.
+2. In Render: **New → Blueprint**, pick this repo, set **SITE_PASSWORD** when prompted (it is never in git;
+   the username is `reviewer`, see `SITE_USER` in render.yaml). Render builds nothing and starts `node serve.js`.
+3. Share the `https://<service>.onrender.com/` URL and the password. Every push to the repo redeploys.
+
+To refresh the results: re-run the audit locally, `publish` again, commit, push. Limits: the free tier sleeps
+after 15 minutes idle (the first request then takes up to a minute); the site is view only (no Edit statement, no
+drafts); the statement data lives in the repository, so keep the repository private.
+
+Environment the server reads (all optional): `PORT`, `HOST`, `DATA_DIR` (default `audit-output`), `READ_ONLY=1`,
+`SITE_USER` / `SITE_PASSWORD`, `DEFAULT_FILTER` (`all` | `fail` | `pass`). Locally, `node run.js serve` runs the
+same server with none of them set: editable, no password, on 127.0.0.1:4310.
+
 ## Output
 
 ```

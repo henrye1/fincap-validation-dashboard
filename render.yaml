@@ -1,0 +1,22 @@
+# Render Blueprint: the results UI, served read-only from the committed `published/` snapshot.
+# Render → New → Blueprint → this repo. Set SITE_PASSWORD in the dashboard when prompted (it is never in git).
+services:
+  - type: web
+    name: fincap-validation-dashboard
+    runtime: node
+    plan: free
+    buildCommand: ""
+    startCommand: node serve.js
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: DATA_DIR
+        value: published
+      - key: READ_ONLY
+        value: "1"
+      - key: DEFAULT_FILTER
+        value: fail
+      - key: SITE_USER
+        value: reviewer
+      - key: SITE_PASSWORD
+        sync: false

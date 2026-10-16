@@ -1,4 +1,5 @@
 /* Financials Auditor UI. Vanilla JS, no build. Data comes from `node run.js serve`:
+ *   /api/config                          { readOnly, defaultFilter } — read-only deployments hide editing and drafts
  *   /api/runs                            the audit runs under audit-output/
  *   /api/drafts/<db>/<run>               the statements of a run that have a saved draft
  *   /data/<db>/<run>/index.json          one row per statement (what summary.csv holds, plus the report path)
@@ -19,6 +20,7 @@
     tab: 0, problemsOnly: false, showPath: false, showUnused: false, checkFilter: null, hl: null,
     sview: (() => { try { return localStorage.getItem('fa.sview') === 'orig' ? 'orig' : 'apr'; } catch { return 'apr'; } })(), // statement layout: apr (chart of accounts) | orig (as captured)
     editing: false,
+    config: { readOnly: false, defaultFilter: 'all' },
   };
 
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -33,6 +35,8 @@
 
   /* ---------- runs ---------- */
   async function loadRuns() {
+    state.config = await get('/api/config').catch(() => state.config); // an older server has no /api/config
+    if (['all', 'fail', 'pass'].includes(state.config.defaultFilter)) state.filter = state.config.defaultFilter;
     state.runs = await get('/api/runs');
     runSelect.innerHTML = state.runs.map(r =>
       `<option value="${esc(r.path)}">${esc(r.db)} / ${esc(r.run)}</option>`).join('');
@@ -51,7 +55,7 @@
       state.rows = await get(`/data/${runPath}/index.json`);
       navStats.innerHTML = `<span>${meta.audited} audited</span><span>${meta.pass} pass</span><span>${meta.fail} fail</span>`;
     }
-    state.drafts = new Set(await get(`/api/drafts/${runPath}`).catch(() => []));
+    state.drafts = state.config.readOnly ? new Set() : new Set(await get(`/api/drafts/${runPath}`).catch(() => []));
     const detail = parts[2] === 's' ? decodeURIComponent(parts.slice(3).join('/')) : null;
     if (detail) await renderDetail(detail); else renderList();
   }
@@ -348,7 +352,7 @@
           <div class="view-pick"><span>View</span><div class="seg sm ${editing ? 'off' : ''}" id="sview" ${editing ? 'title="The editor works in the original view"' : ''}>
             ${[['orig', 'Original'], ['apr', 'APR']].map(([k, l]) => `<button data-v="${k}" class="${(editing ? 'orig' : state.sview) === k ? 'on' : ''}" ${editing ? 'disabled' : ''}>${l}</button>`).join('')}
           </div></div>
-          ${!editing ? `<button class="btn" id="edit-start">${icon('edit')}Edit statement</button>` : ''}
+          ${!editing && !state.config.readOnly ? `<button class="btn" id="edit-start">${icon('edit')}Edit statement</button>` : ''}
         </div>
       </div>
       <div class="options">

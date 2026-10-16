@@ -1,0 +1,93 @@
+{
+  "args": {
+    "db": "aprs_za_abl_db",
+    "ai": false,
+    "out": "audit-output/aprs_za_abl_db/full",
+    "resume": false,
+    "concurrency": 4
+  },
+  "host": "localhost",
+  "db": "aprs_za_abl_db",
+  "started": "2026-10-16T07:50:19.924Z",
+  "finished": "2026-10-16T07:50:43.058Z",
+  "interrupted": false,
+  "selected": 223,
+  "audited": 223,
+  "skipped_existing": 0,
+  "pass": 144,
+  "fail": 79,
+  "rows_in_summary": 223,
+  "checks": {
+    "publish_gate": {
+      "pass": 151,
+      "fail": 72,
+      "advice": 0,
+      "error": 0,
+      "skipped": 0
+    },
+    "no_blank_values": {
+      "pass": 215,
+      "fail": 8,
+      "advice": 0,
+      "error": 0,
+      "skipped": 0
+    },
+    "chart_of_accounts_mapping": {
+      "pass": 223,
+      "fail": 0,
+      "advice": 0,
+      "error": 0,
+      "skipped": 0
+    },
+    "mapping_cardinality": {
+      "pass": 223,
+      "fail": 0,
+      "advice": 0,
+      "error": 0,
+      "skipped": 0
+    },
+    "cash_ties": {
+      "pass": 180,
+      "fail": 0,
+      "advice": 43,
+      "error": 0,
+      "skipped": 0
+    },
+    "profit_ties": {
+      "pass": 191,
+      "fail": 0,
+      "advice": 32,
+      "error": 0,
+      "skipped": 0
+    },
+    "ratios_translatable": {
+      "pass": 222,
+      "fail": 1,
+      "advice": 0,
+      "error": 0,
+      "skipped": 0
+    },
+    "ai_source_comparison": {
+      "pass": 0,
+      "fail": 0,
+      "advice": 0,
+      "error": 0,
+      "skipped": 223
+    },
+    "ai_ratio_analysis": {
+      "pass": 0,
+      "fail": 0,
+      "advice": 0,
+      "error": 0,
+      "skipped": 223
+    },
+    "missing_subtotals": {
+      "pass": 0,
+      "fail": 58,
+      "advice": 0,
+      "error": 0,
+      "skipped": 0
+    }
+  },
+  "errors": []
+}

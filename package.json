@@ -4,8 +4,13 @@
   "private": true,
   "description": "Read-only audit of published financial statements: runs anchorpoint-ts's own validators over a database and writes a report per statement. Standalone — not part of the app, nothing installed here; it borrows ../anchorpoint-suite/anchorpoint-ts/node_modules so TypeORM is one instance.",
   "scripts": {
-    "start": "node run.js audit",
+    "start": "node serve.js",
+    "serve": "node serve.js",
     "audit": "node run.js audit",
+    "publish": "node run.js publish",
     "test": "node run.js test"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
