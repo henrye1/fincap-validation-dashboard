@@ -54,6 +54,23 @@ shows them in the order they were captured, with a missing total placed after it
 before the UI existed have no per-statement JSON, and runs made before the Original view have no captured order;
 re-run the audit to get them.
 
+### Editing a statement (drafts)
+
+**Edit statement** opens the Original view with every line editable: text, mapping (the statement's chart of
+accounts, "No map", or none), and the value per period; lines can be added (**Add line**, or **Add total line** on a
+missing total, which pre-fills the sum of its children) and removed. Validation re-runs on every change in the
+browser (`ui/gate.js`): the publish gate's three rules, Missing Subtotals, Chart of Accounts Mapping, Mapping
+Cardinality and No Blank Values, with the same tolerance and wording as the app. Cash Ties, Profit Ties, the ratio
+translation and the AI legs need the database and keep the audit run's result. **Save draft** writes
+`<report>.draft.json` beside the audit's report (the whole edited statement plus a list of changes); the page then
+shows the draft with its live checks, the list marks it "Draft", and **Revert to audited** removes it. Nothing is
+ever written to the database: a draft is a worked proposal to apply in the capture screen.
+
+`gate.js` was checked against the audit of all 223 statements: it rebuilds every statement view exactly and
+reproduces the publish gate's findings on every statement (three differ only in float rounding or in which of two
+lines on the same total is named). No Blank Values depends on the app's database row order, which the view does not
+carry; it disagreed on 6 of 223 statements.
+
 ## Output
 
 ```

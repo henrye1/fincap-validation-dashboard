@@ -190,7 +190,8 @@ export function buildStatementView(
             const mapping = byId.get(lc(line.financial_statement_line_mapping_id));
             const values = valuesOf(line.facts, periods);
             const kind: ViewRowKind = isNoMap(mapping) ? 'nomap'
-                : (!line.financial_statement_line_mapping_id && Object.values(values).every(v => v == null)) ? 'heading'
+                // A 0 counts as no value, as FinancialsHelper.isFinancialHeading reads it.
+                : (!line.financial_statement_line_mapping_id && Object.values(values).every(v => v == null || v === 0)) ? 'heading'
                 : 'unmapped';
             rows.push({
                 kind, depth: 0, mapping_id: line.financial_statement_line_mapping_id ?? null,

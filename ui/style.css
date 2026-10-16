@@ -162,3 +162,36 @@ tr.k-note td { color: var(--cl-off-text-color); font-style: italic; }
 
 @media (max-width: 960px) { .split { grid-template-columns: minmax(0, 1fr); } .checks { position: static; } .facts .wide { grid-column: span 1; } }
 @media (max-width: 640px) { .page { padding: 16px 12px 60px; } .nav { padding: 0 12px; gap: 10px; } .nav-stats { display: none; } }
+
+/* Editor */
+.edit-bar { display: flex; align-items: center; gap: 12px; padding: 10px 15px; background: var(--cl-primary-50); border: 1px solid var(--cl-card-outline-color); border-top: none; flex-wrap: wrap; font-size: 14px; }
+.edit-bar .ms-icon { color: var(--cl-primary-color); }
+.edit-bar b { color: var(--cl-primary-color); }
+.edit-bar .actions { margin-left: auto; display: flex; gap: 10px; }
+.btn.primary { background: var(--cl-primary-color); color: #fff; }
+.btn.primary:hover { background: var(--cl-primary-color-shaded); }
+.btn.ghost { border-color: transparent; }
+.btn.sm { height: 32px; padding: 0 10px; font-size: 13px; }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+.seg.off { opacity: .5; } .seg.off button { cursor: not-allowed; }
+.draft-bar { display: flex; align-items: center; gap: 10px; padding: 10px 15px; background: #fff8e1; border: 1px solid #ffe08a; color: #6b4e00; font-size: 14px; flex-wrap: wrap; }
+.draft-bar .ms-icon { color: var(--cl-progress-state-color); }
+.draft-bar .actions { margin-left: auto; display: flex; gap: 14px; }
+.draft-bar a { font-weight: 600; cursor: pointer; }
+.edit-table { min-width: 900px; }
+.edit-table td { padding: 6px 8px; vertical-align: top; }
+.edit-table td.val-cell { padding: 12px 12px 6px; }
+.edit-table input, .edit-table select { width: 100%; box-sizing: border-box; height: 32px; padding: 0 8px; font: inherit; font-size: 14px; border: 1px solid var(--cl-border-color); border-radius: 0; background: #fff; color: var(--cl-text-color); outline-color: var(--cl-primary-color); }
+.edit-table select { font-size: 13px; padding: 0 6px; }
+.edit-table input.num { text-align: right; font-variant-numeric: tabular-nums; }
+.edit-table input.changed, .edit-table select.changed { background: var(--cl-primary-50); }
+.edit-table .ph { padding: 6px 4px; font-style: italic; color: var(--cl-subtext-color); }
+.edit-table .ph a { font-style: normal; font-weight: 600; margin-left: 8px; cursor: pointer; }
+.edit-table .map-static { padding: 6px 4px; font-size: 13px; font-weight: 700; }
+.edit-table .sub { font-size: 11px; color: var(--cl-error-color); text-align: right; padding: 2px 8px 0; min-height: 13px; }
+.edit-table .rm { border: 0; background: none; color: var(--cl-inactive-color); cursor: pointer; padding: 6px 4px; }
+.edit-table .rm:hover { color: var(--cl-error-color); }
+.edit-table .rm .ms-icon { font-size: 18px; }
+.edit-table tr.new td { border-left: 3px solid var(--cl-action-color); }
+.list-table .draft { font-size: 11px; font-weight: 700; color: #6b4e00; background: #fff3cd; padding: 1px 6px; margin-left: 6px; vertical-align: middle; }
+.stmts-head .right { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
